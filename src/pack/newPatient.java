@@ -22,14 +22,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 public class newPatient extends JFrame {
-
+	static int i,j;
 	private JPanel contentPane;
 	Connection con;
 	Statement st;
 	ResultSet rs;
 	int id,ward;
 	String name,dis;
-	private JTextField idTf;
 	private JTextField nameTf;
 	private JTextField disTf;
 	private JTextField wardTf;
@@ -72,47 +71,37 @@ public class newPatient extends JFrame {
 		lblNewLabel.setBounds(12, 32, 773, 69);
 		contentPane.add(lblNewLabel);
 		
-		JLabel lblNewLabel_1 = new JLabel("Patient Id:");
-		lblNewLabel_1.setFont(new Font("Dialog", Font.BOLD, 17));
-		lblNewLabel_1.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblNewLabel_1.setBounds(12, 137, 138, 31);
-		contentPane.add(lblNewLabel_1);
-		
-		idTf = new JTextField();
-		idTf.setBounds(193, 142, 375, 24);
-		contentPane.add(idTf);
-		idTf.setColumns(10);
-		
 		JLabel lblDoctorName = new JLabel("Patient Name:");
 		lblDoctorName.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblDoctorName.setFont(new Font("Dialog", Font.BOLD, 17));
-		lblDoctorName.setBounds(12, 194, 138, 31);
+		lblDoctorName.setBounds(12, 182, 138, 43);
 		contentPane.add(lblDoctorName);
 		
 		nameTf = new JTextField();
 		nameTf.setColumns(10);
-		nameTf.setBounds(193, 199, 375, 24);
+		nameTf.setBounds(193, 182, 397, 41);
 		contentPane.add(nameTf);
 		
 		JLabel lblSpeciality = new JLabel("disease:");
 		lblSpeciality.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblSpeciality.setFont(new Font("Dialog", Font.BOLD, 17));
-		lblSpeciality.setBounds(12, 264, 138, 31);
+		lblSpeciality.setBounds(12, 252, 138, 43);
 		contentPane.add(lblSpeciality);
 		
 		disTf = new JTextField();
 		disTf.setColumns(10);
-		disTf.setBounds(193, 269, 375, 24);
+		disTf.setBounds(193, 252, 397, 41);
 		contentPane.add(disTf);
 		
 		JButton addBtn = new JButton("Add");
 		addBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			
-			id=Integer.parseInt(idTf.getText().toString());
+			id=++i;
 			name=nameTf.getText().toString();
 			dis=disTf.getText().toString();
 			ward=Integer.parseInt(wardTf.getText().toString());
+			
 			add_patient(id, name, dis, ward);
 			}
 		});
@@ -126,18 +115,18 @@ public class newPatient extends JFrame {
 				dispose();
 			}
 		});
-		cnclBtn.setBounds(426, 416, 138, 41);
+		cnclBtn.setBounds(452, 416, 138, 41);
 		contentPane.add(cnclBtn);
 		
 		JLabel lblWard = new JLabel("Ward:");
 		lblWard.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblWard.setFont(new Font("Dialog", Font.BOLD, 17));
-		lblWard.setBounds(12, 325, 138, 31);
+		lblWard.setBounds(12, 325, 138, 48);
 		contentPane.add(lblWard);
 		
 		wardTf = new JTextField();
 		wardTf.setColumns(10);
-		wardTf.setBounds(193, 330, 375, 24);
+		wardTf.setBounds(193, 330, 397, 43);
 		contentPane.add(wardTf);
 	}
 	
@@ -150,10 +139,24 @@ public class newPatient extends JFrame {
 		try {
 			con=DriverManager.getConnection("jdbc:postgresql://localhost:5432/hospital","postgres","");
 			st=con.createStatement();
+			
+			rs=st.executeQuery("select MAX(pid) from patient;");
+			while(rs.next()){
+				i=rs.getInt(1);
+			}
+			System.out.println("i: "+i);
+			
+			rs=st.executeQuery("select MAX(bid) from bill;");
+			while(rs.next()){
+				j=rs.getInt(1);
+			}
+			System.out.println("j: "+j);
 		}catch(Exception e)
 		{
 			System.out.println(e);
 		}
+		
+		
 		
 	}
 	
@@ -161,15 +164,30 @@ public class newPatient extends JFrame {
 	{
 	try {
 		st.executeUpdate("insert into patient values("
-				+ id
-				+ ",'"+name+"'"
-				+ ",'"+dis+"'"
-				+ ward
-				+ ")");
+					+id+",'"
+					+name+"','"
+					+dis+"',"
+					+ward+");");
+		
+		int charges = 0;
+		rs=st.executeQuery("select charges from ward where wno="+ward+";");
+		while(rs.next())
+		{
+			charges=rs.getInt(1);
+		}
+		
+		
+	st.executeUpdate("insert into bill values("
+					+ ++j +",'"
+					+charges+"','"
+					+i+"',"
+					+charges+");");
+		
 		JOptionPane.showMessageDialog(null, "patient Added", "Done !",JOptionPane.INFORMATION_MESSAGE );
 	} catch (Exception e) 
 	{
 		System.out.println(e);
 	}
+	
 	}
 }

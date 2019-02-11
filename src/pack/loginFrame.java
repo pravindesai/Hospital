@@ -59,7 +59,6 @@ public class loginFrame extends JFrame {
 		setBackground(Color.LIGHT_GRAY);
 		
 		JPanel contentPane = new JPanel();
-		contentPane.setBackground(Color.lightGray);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
